@@ -17,4 +17,4 @@ Credits and sources are provided throughout this repo.
 ## Contact Info
 Feel free to contact me to discuss any issues, questions, or comments.
 
-My contact info can be found on my [Github Page](https://github.com/saikunocoda)
+My contact info can be found on my [Github Page](https://github.com/saikunocoda) or  [Resume](https://divyanshverma.netlify.app).
