@@ -16,7 +16,8 @@
     * Major benefits of inheritance is code reuse.
 4. **Polymorphism**: It is the ability of an object to pretend to be something else, usually a class it extends or an interface it implements.
     * Ability of a program to detect the real class of an object and call its implementation even when its real tyoe is unknown in the current context. 
-``` bag = [new Cat(), new Dog()];
+``` 
+    bag = [new Cat(), new Dog()];
     foreach (Animal a : bag)
         a.makesound()
 ```
