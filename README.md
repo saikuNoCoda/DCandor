@@ -2,7 +2,7 @@
 # DCandor
 
 ## Motivation
-    Put all the learning related to software engineering in a single place. To help myself to explore/revise things as everything can't be remembered in first read.
+Put all the learning related to software engineering in a single place. To help myself to explore/revise things as everything can't be remembered in first read.
 
 # Contributing
 Feel free to submit pull requests to help:
