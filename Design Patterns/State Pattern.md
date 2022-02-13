@@ -1,0 +1,211 @@
+# State design pattern
+
+**State** is a *behavioral* design pattern that lets an object alter its behavior when its internal state changes. It appears as if the object changed its class.
+
+### Why?
+* State design patterns is used to replicate state machines.
+* The biggest weakness of a state machine based on conditions i.e. `if() {} else {}` is that once we start adding more and more states and state-dependent behavior to the class. Most methods will contain monstrous conditonals that pick the proper behavior of a method according to the current state.
+* Code like this is difficult to maintain because any change to the transaction logic may require changing state conditions in every method.
+* It's quite difficult to predict all the possible state and transactions at the design state. 
+
+### What this pattern is?
+* This pattern suggests that you create new classes for all possible states of an object and extract all state specific behavior into these classes.
+* Instead of implementing all behavior of its own the original object, called **context** stores the reference to one of the state objects that represent current state, and delegates all the state-related work to that objects.
+* To transition the context into another state, replace the active state object with another object that represents that new state. This is possible only if all the state classes follow the same interface and the context itself works with these objects through that interface.
+
+### Struture
+* **Context** stores a reference to one of the concrete state objects and delegates to it all the state-specific work. The context communicates with the state object via state interface. The context exposes a setter for passing it a new state object.
+* **State** interface declares the state specific method. These methods should make sense for all the concrete states because you don't wamt some of your states to have useless methods that will never be called.
+* **Concrete State** provide their own implementations for the state-specific methods to avoid duplication of similar code across multiple states, you may provide intermediate abstract classes that encapsulate some common behavior.
+* State objects may store a backreference to the context object. Through this reference, the state can fetch any required info from the context object, as well as initiate state transitions.
+* Both context and concrete states can set the next next of the context and perform the actual state transition by replacing the state object linked to the context.
+
+### Code
+
+<details><summary>Proxy Pattern</summary>
+`State.java`
+
+```java
+public abstract class State {
+    Player player;
+
+    State (Player player) {
+        this.player = player;
+    }
+
+    public abstract String onLock();
+    public abstract String onPlay();
+    public abstract String onNext();
+    public abstract String onPrevious();
+}
+```
+
+`Player.java`
+
+```java
+public class Player {
+    private State state;
+    private boolean playing = false;
+    private List<String> playlist = new ArrayList<>();
+    private int currentTrack = 0;
+
+    public Player() {
+        this.state = new ReadyState(this);
+        setPlaying(true);
+        for (int i = 0; i <= 12; i++) {
+            playlist.add("Track " + i);
+        }
+    }
+
+    public void changeState(State state) {
+        this.state = state;
+    }
+
+    public State geState() {
+        return state;
+    }
+
+    public void setPlaying(boolean playing) {
+        this.playing = playing;
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    public String startPlayback() {
+        return "Playing " + playlist.get(currentTrack); 
+    }
+
+    public String nextTrack() {
+        currentTrack++;
+        if (currentTrack > playlist.size() - 1) {
+            currentTrack = 0;
+        }
+        return "Playing " + playlist.get(currentTrack);
+    }
+
+    public String previousTrack() {
+        currentTrack--;
+        if (currentTrack < 0) {
+            currentTrack = playlist.size() - 1;
+        }
+        return "Playing " + playlist.get(currentTrack);
+    }
+
+    public void setCurrentTrackAfterStop() {
+        this.currentTrack = 0;
+    }
+}
+```
+
+`ReadyState.java` 
+
+```java
+public class ReadyState extends State {
+    ReadyState(Player player) {
+        super(player);
+    }
+
+    @Override
+    public String onLock() {
+        player.changeState(new LockedState(player));
+        return "Locked...";
+    }
+
+    @Override
+    public String onPlay() {
+        String action = player.startPlayback();
+        player.changeState(new PlayingState(player));
+        return action;
+    }
+
+    @Override
+    public String onNext() {
+        return "Locked...";
+    }
+
+    @Override
+    public String onPrevious() {
+        return "Locked...";
+    }
+}
+```
+
+`LockedSate.java`
+
+```java
+public class LockedState extends State {
+    LockedState(Player player) {
+        super(player);
+        player.setPlaying(false);
+    }
+
+    @Override
+    public String onLock() {
+        if (player.isPlaying()) {
+            player.changeState(new ReadyState(player));
+            return "Stop Playing";
+        } else {
+            return "Locked...";
+        }
+    }
+
+    @Override
+    public String onPlay() {
+        player.changeState(new ReadyState(player));
+        return "Ready";
+    }
+
+    @Override
+    public String onNext() {
+        return "Locked...";
+    }
+
+    @Override
+    public String onPrevious() {
+        return "Locked...";
+    }
+}
+```
+
+`PlayingState.java`
+
+```java
+public class PlayingState extends State {
+    PlayingState(Player player) {
+        super(player);
+    }
+
+    @Override
+    public String onLock() {
+        player.changeState(new LockedState(player));
+        player.setCurrentTrackAfterStop();
+        return "Stop playing";
+    }
+
+    @Override
+    public String onPlay() {
+        player.changeState(new ReadyState(player));
+        return "Stop playing";
+    }
+
+    @Override
+    public String onNext() {
+        return player.nextTrack();
+    }
+
+    @Override
+    public String onPrevious() {
+        return player.previousTrack();
+    }
+}
+```
+
+</details>
+
+
+### Credits
+- [Refactoring.Guru](https://refactoring.guru/)
+
+
